@@ -33,9 +33,10 @@ const Booking = () => {
   if (!vehicle || !bookingData) return null;
 
   const steps = [
-    { number: 1, title: 'Personal Details', icon: CheckCircle },
-    { number: 2, title: 'Payment', icon: CreditCard },
-    { number: 3, title: 'Confirmation', icon: CheckCircle },
+    { number: 1, title: 'Personal Details', icon: CheckCircle, description: 'Enter your information' },
+    { number: 2, title: 'Documents', icon: FileText, description: 'Upload required documents' },
+    { number: 3, title: 'Payment', icon: CreditCard, description: 'Choose payment method' },
+    { number: 4, title: 'Confirmation', icon: CheckCircle, description: 'Review & confirm' },
   ];
 
   const handleApplyOffer = () => {
@@ -69,6 +70,12 @@ const Booking = () => {
       }
     }
     if (currentStep === 2) {
+      if (!documents.drivingLicense || !documents.idProof) {
+        alert('Please upload both documents');
+        return;
+      }
+    }
+    if (currentStep === 3) {
       if (!paymentMethod) {
         alert('Please select a payment method');
         return;
@@ -206,70 +213,108 @@ const Booking = () => {
                   </div>
                 </div>
 
-                {/* Document Upload */}
-                <div className="space-y-4 pt-6 border-t border-gray-200">
-                  <h3 className="text-lg font-semibold">Document Upload</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <FileText className="w-4 h-4 inline mr-1" />
-                        Driving License
-                      </label>
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                        <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
-                        <input
-                          type="file"
-                          accept="image/*,.pdf"
-                          className="hidden"
-                          id="drivingLicense"
-                          onChange={(e) =>
-                            setDocuments({ ...documents, drivingLicense: e.target.files[0] })
-                          }
-                        />
-                        <label
-                          htmlFor="drivingLicense"
-                          className="btn-primary text-sm py-2 px-4 mt-2 inline-block cursor-pointer"
-                        >
-                          Upload File
-                        </label>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        <FileText className="w-4 h-4 inline mr-1" />
-                        ID Proof (Aadhar/PAN)
-                      </label>
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                        <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
-                        <input
-                          type="file"
-                          accept="image/*,.pdf"
-                          className="hidden"
-                          id="idProof"
-                          onChange={(e) =>
-                            setDocuments({ ...documents, idProof: e.target.files[0] })
-                          }
-                        />
-                        <label
-                          htmlFor="idProof"
-                          className="btn-primary text-sm py-2 px-4 mt-2 inline-block cursor-pointer"
-                        >
-                          Upload File
-                        </label>
-                      </div>
-                    </div>
-                  </div>
+                <div className="flex space-x-4 pt-4">
+                  <button
+                    onClick={() => setCurrentStep(1)}
+                    className="btn-secondary w-full bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  >
+                    Back
+                  </button>
+                  <button onClick={handleNext} className="btn-primary w-full">
+                    Continue to Documents
+                  </button>
                 </div>
-
-                <button onClick={handleNext} className="btn-primary w-full">
-                  Continue to Payment
-                </button>
               </div>
             )}
 
             {currentStep === 2 && (
+              <div className="card p-6 space-y-6">
+                <h2 className="text-2xl font-bold mb-6">Upload Documents</h2>
+                <p className="text-gray-600 mb-6">
+                  Please upload the required documents to proceed with your booking.
+                </p>
+
+                {/* Document Upload */}
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <FileText className="w-4 h-4 inline mr-1" />
+                      Driving License <span className="text-red-500">*</span>
+                    </label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-500 transition-colors">
+                      <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-sm text-gray-600 mb-2">Click to upload or drag and drop</p>
+                      <p className="text-xs text-gray-500 mb-4">PDF, JPG, PNG (Max 5MB)</p>
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        className="hidden"
+                        id="drivingLicense"
+                        onChange={(e) =>
+                          setDocuments({ ...documents, drivingLicense: e.target.files[0] })
+                        }
+                      />
+                      <label
+                        htmlFor="drivingLicense"
+                        className="btn-primary text-sm py-2 px-6 inline-block cursor-pointer"
+                      >
+                        {documents.drivingLicense ? 'Change File' : 'Upload File'}
+                      </label>
+                      {documents.drivingLicense && (
+                        <p className="text-sm text-green-600 mt-2">
+                          ✓ {documents.drivingLicense.name}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <FileText className="w-4 h-4 inline mr-1" />
+                      ID Proof (Aadhar/PAN) <span className="text-red-500">*</span>
+                    </label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-500 transition-colors">
+                      <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-sm text-gray-600 mb-2">Click to upload or drag and drop</p>
+                      <p className="text-xs text-gray-500 mb-4">PDF, JPG, PNG (Max 5MB)</p>
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        className="hidden"
+                        id="idProof"
+                        onChange={(e) =>
+                          setDocuments({ ...documents, idProof: e.target.files[0] })
+                        }
+                      />
+                      <label
+                        htmlFor="idProof"
+                        className="btn-primary text-sm py-2 px-6 inline-block cursor-pointer"
+                      >
+                        {documents.idProof ? 'Change File' : 'Upload File'}
+                      </label>
+                      {documents.idProof && (
+                        <p className="text-sm text-green-600 mt-2">
+                          ✓ {documents.idProof.name}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex space-x-4 pt-4">
+                  <button
+                    onClick={() => setCurrentStep(1)}
+                    className="btn-secondary w-full bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  >
+                    Back
+                  </button>
+                  <button onClick={handleNext} className="btn-primary w-full">
+                    Continue to Payment
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 3 && (
               <div className="card p-6 space-y-6">
                 <h2 className="text-2xl font-bold mb-6">Payment Method</h2>
 
@@ -354,7 +399,7 @@ const Booking = () => {
 
                 <div className="flex space-x-4">
                   <button
-                    onClick={() => setCurrentStep(1)}
+                    onClick={() => setCurrentStep(2)}
                     className="btn-secondary w-full bg-gray-200 text-gray-700 hover:bg-gray-300"
                   >
                     Back
@@ -366,7 +411,7 @@ const Booking = () => {
               </div>
             )}
 
-            {currentStep === 3 && (
+            {currentStep === 4 && (
               <div className="card p-6 text-center space-y-6">
                 <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
                   <CheckCircle className="w-12 h-12 text-green-600" />

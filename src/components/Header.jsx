@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, MapPin, Globe, User, LogIn } from 'lucide-react';
+import { Menu, X, MapPin, Globe, User, LogIn, LayoutDashboard, ChevronDown } from 'lucide-react';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const [language, setLanguage] = useState('English');
+  const [userType, setUserType] = useState('client'); // 'client' or 'admin'
   const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -42,6 +44,41 @@ const Header = () => {
               <Link to="/contact" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                 Contact
               </Link>
+              {/* Dashboard Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsDashboardOpen(!isDashboardOpen)}
+                  className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 font-medium transition-colors"
+                >
+                  <LayoutDashboard className="w-5 h-5" />
+                  <span>Dashboard</span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                {isDashboardOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    <button
+                      onClick={() => {
+                        navigate('/dashboard');
+                        setIsDashboardOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors flex items-center space-x-2"
+                    >
+                      <User className="w-4 h-4" />
+                      <span>Client Dashboard</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigate('/admin/dashboard');
+                        setIsDashboardOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors flex items-center space-x-2"
+                    >
+                      <LayoutDashboard className="w-4 h-4" />
+                      <span>Admin Dashboard</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </nav>
 
             {/* Right Side Actions */}
@@ -136,6 +173,30 @@ const Header = () => {
                 >
                   Contact
                 </Link>
+                {/* Mobile Dashboard Options */}
+                <div className="border-t border-gray-200 pt-4 space-y-2">
+                  <p className="text-sm font-semibold text-gray-500 uppercase px-2">Dashboard</p>
+                  <button
+                    onClick={() => {
+                      navigate('/dashboard');
+                      toggleMenu();
+                    }}
+                    className="w-full text-left px-2 py-2 text-gray-700 hover:text-primary-600 font-medium transition-colors flex items-center space-x-2"
+                  >
+                    <User className="w-4 h-4" />
+                    <span>Client Dashboard</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate('/admin/dashboard');
+                      toggleMenu();
+                    }}
+                    className="w-full text-left px-2 py-2 text-gray-700 hover:text-primary-600 font-medium transition-colors flex items-center space-x-2"
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span>Admin Dashboard</span>
+                  </button>
+                </div>
                 <button
                   onClick={() => {
                     toggleLogin();
@@ -151,6 +212,14 @@ const Header = () => {
           )}
         </div>
       </header>
+
+      {/* Close Dashboard Dropdown when clicking outside */}
+      {isDashboardOpen && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setIsDashboardOpen(false)}
+        />
+      )}
 
       {/* Login Modal */}
       {isLoginOpen && (
@@ -175,15 +244,46 @@ const Header = () => {
               </button>
             </div>
 
+            {/* User Type Selection */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Login As
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setUserType('client')}
+                  className={`py-3 px-4 rounded-lg border-2 font-medium transition-all ${
+                    userType === 'client'
+                      ? 'border-primary-600 bg-primary-50 text-primary-600'
+                      : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                  }`}
+                >
+                  Client
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUserType('admin')}
+                  className={`py-3 px-4 rounded-lg border-2 font-medium transition-all ${
+                    userType === 'admin'
+                      ? 'border-primary-600 bg-primary-50 text-primary-600'
+                      : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                  }`}
+                >
+                  Admin
+                </button>
+              </div>
+            </div>
+
             <form className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
+                  {userType === 'admin' ? 'Admin ID / Email' : 'Phone Number'}
                 </label>
                 <input
-                  type="tel"
+                  type={userType === 'admin' ? 'email' : 'tel'}
                   className="input-field"
-                  placeholder="Enter your phone number"
+                  placeholder={userType === 'admin' ? 'Enter admin email' : 'Enter your phone number'}
                 />
               </div>
               <div>
@@ -200,11 +300,15 @@ const Header = () => {
                 type="button"
                 onClick={() => {
                   toggleLogin();
-                  navigate('/dashboard');
+                  if (userType === 'admin') {
+                    navigate('/admin/dashboard');
+                  } else {
+                    navigate('/dashboard');
+                  }
                 }}
                 className="btn-primary w-full"
               >
-                Login
+                Login as {userType === 'admin' ? 'Admin' : 'Client'}
               </button>
             </form>
 
